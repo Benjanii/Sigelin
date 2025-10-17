@@ -1,0 +1,58 @@
+import { useEffect, useState } from "react";
+import { health, getItems, addItem } from "./api";
+
+export default function App() {
+  const [status, setStatus] = useState("checking...");
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    health().then(r => setStatus(r.data.status)).catch(() => setStatus("error"));
+    refreshItems();
+  }, []);
+
+  const refreshItems = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getItems();
+      setItems(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = async () => {
+    const newItem = { code: `EQ-${Date.now()}`, type: "pc", status: "OK", location: "Lab-3", qr: `QR-${Date.now()}` };
+    await addItem(newItem);
+    await refreshItems();
+  };
+
+  return (
+    <div style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 900, margin: "0 auto" }}>
+      <h1>SIGELIN Frontend</h1>
+      <p><strong>API health:</strong> {status}</p>
+
+      <div style={{ marginBottom: 16 }}>
+        <button onClick={handleAdd}>Agregar Item (demo)</button>
+        <button onClick={refreshItems} style={{ marginLeft: 8 }}>Refrescar</button>
+      </div>
+
+      {loading ? <p>Cargando...</p> : (
+        <table border="1" cellPadding="8" cellSpacing="0">
+          <thead>
+            <tr>
+              <th>Code</th><th>Type</th><th>Status</th><th>Location</th><th>QR</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(it => (
+              <tr key={it.code}>
+                <td>{it.code}</td><td>{it.type}</td><td>{it.status}</td><td>{it.location}</td><td>{it.qr}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
