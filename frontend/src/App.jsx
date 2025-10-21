@@ -1,105 +1,137 @@
-import { useEffect, useState } from "react";
-import { health, getItems, addItem } from "./api";
+// frontend/src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 
-function normalizeItems(data) {
-  // Si /inventory/ devuelve un array, úsalo
-  if (Array.isArray(data)) return data;
-  // Si devuelve objeto con { items: [...] }, úsalo
-  if (data && Array.isArray(data.items)) return data.items;
-  // Si devuelve error { detail: ... }, log y vacío
-  if (data && data.detail) {
-    console.error("API detail:", data.detail);
-    return [];
-  }
-  return [];
-}
+import LoginPage from "./pages/Login";
+import DashboardPage from "./pages/Dashboard";
+import InventoryPage from "./pages/Inventory";
+import RepairsPage from "./pages/Repairs";      // <-- SOLO una vez
+import RepairFormPage from "./pages/RepairForm";
+import PartsPage from "./pages/Parts";
+import PurchasesPage from "./pages/Purchases";
+import ReportsPage from "./pages/Reports";
+import UsersPage from "./pages/Users";
+import Shell from "./layout/Shell";
+import InventoryFormPage from "./pages/InventoryForm";
+import InventoryEditPage from "./pages/InventoryEdit";
+import PurchaseReportsPage from "./pages/PurchaseReports";
+import RepairReportPage from "./pages/RepairReport";
+import PartFormPage from "./pages/PartForm";
 
 export default function App() {
-  const [status, setStatus] = useState("checking...");
-  const [error, setError] = useState("");
-  const [items, setItems] = useState([]);   // SIEMPRE array
-  const [loading, setLoading] = useState(false);
-
-  const refreshItems = async () => {
-    setLoading(true);
-    try {
-      const { data } = await getItems();      // GET /inventory/
-      const normalized = normalizeItems(data);
-      setItems(normalized);
-      if (!Array.isArray(data) && !Array.isArray(data?.items)) {
-        setError(prev => (prev ? prev + "\n" : "") + "La API devolvió un formato no esperado. Revisa /inventory/ en el navegador.");
-      }
-    } catch (e) {
-      console.error(e);
-      setError(prev => (prev ? prev + "\n" : "") + String(e?.message || e));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await health();       // GET /health
-        setStatus(data.status);
-      } catch (e) {
-        console.error(e);
-        setStatus("error");
-        setError(prev => (prev ? prev + "\n" : "") + "Error llamando /health: " + String(e?.message || e));
-      }
-    })();
-    refreshItems();
-  }, []);
-
-  const handleAdd = async () => {
-    try {
-      const newItem = {
-        code: `EQ-${Date.now()}`,
-        type: "pc",
-        status: "OK",
-        location: "Lab-3",
-        qr: `QR-${Date.now()}`
-      };
-      await addItem(newItem);      // POST /inventory/
-      await refreshItems();
-    } catch (e) {
-      console.error(e);
-      setError(prev => (prev ? prev + "\n" : "") + "Error al agregar: " + String(e?.message || e));
-    }
-  };
-
   return (
-    <div style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 900, margin: "0 auto" }}>
-      <h1>SIGELIN Frontend</h1>
-      <p><strong>API health:</strong> {status}</p>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={handleAdd}>Agregar Item (demo)</button>
-        <button onClick={refreshItems} style={{ marginLeft: 8 }}>Refrescar</button>
-      </div>
-
-      {error && <pre style={{color:"crimson", whiteSpace:"pre-wrap"}}>{error}</pre>}
-
-      {loading ? <p>Cargando...</p> : (
-        <table border="1" cellPadding="8" cellSpacing="0">
-          <thead>
-            <tr>
-              <th>Code</th><th>Type</th><th>Status</th><th>Location</th><th>QR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(it => (
-              <tr key={it.code}>
-                <td>{it.code}</td>
-                <td>{it.type}</td>
-                <td>{it.status}</td>
-                <td>{it.location}</td>
-                <td>{it.qr}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><DashboardPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><InventoryPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/repairs"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><RepairsPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/repairs/new"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><RepairFormPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parts"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><PartsPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchases"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN"]}>
+              <Shell><PurchasesPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><ReportsPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","DIRECTOR"]}>
+              <Shell><UsersPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+        path="/inventory/new"
+        element={
+            <ProtectedRoute rolesPermitidos={["ADMIN"]}>
+              <Shell><InventoryFormPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/edit/:code"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN"]}>
+              <Shell><InventoryEditPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchase-reports"
+          element={
+            <ProtectedRoute rolesPermitidos={["DIRECTOR"]}>
+              <Shell><PurchaseReportsPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/repairs/report/:id"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN","TECH","DIRECTOR"]}>
+              <Shell><RepairReportPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parts/new"
+          element={
+            <ProtectedRoute rolesPermitidos={["ADMIN"]}>
+              <Shell><PartFormPage /></Shell>
+            </ProtectedRoute>
+          }
+        />
+        {/* Redirecciones */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
