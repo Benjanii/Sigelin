@@ -1,89 +1,62 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { clearToken, getRoleFromToken } from "../auth";
-import api from "../api";
-import { useEffect, useState } from "react";
-
-const LinkItem = ({ to, children, requirePerm }) => {
-  // si quieres condicionar por permisos, trae can() aquí
-  return (
-    <NavLink
-      to={to}
-      style={({isActive}) => ({
-        display:"block", padding:"8px 12px",
-        background: isActive ? "#222" : "transparent",
-        color:"#eee", textDecoration:"none", borderRadius:6
-      })}
-    >
-      {children}
-    </NavLink>
-  );
-};
-
-function NotificationBell({ role }) {
-  const [list, setList] = useState([]);
-  const nav = useNavigate();
-
-  const load = async () => {
-    try {
-      const { data } = await api.get("/notifications");
-      setList(Array.isArray(data) ? data.filter(n => !n.read) : []);
-    } catch {}
-  };
-
-  useEffect(()=>{ load(); const id = setInterval(load, 8000); return ()=>clearInterval(id); }, []);
-
-  const onClick = () => {
-    // Para el Director, ir a reportes de compra
-    if (role === "DIRECTOR") {
-      nav("/purchase-reports");
-    } else {
-      alert("No tienes reportes asignados.");
-    }
-  };
-
-  return (
-    <button onClick={onClick} style={{ position:"relative" }}>
-      🔔
-      {list.length > 0 && (
-        <span style={{
-          position:"absolute", top:-6, right:-6, background:"crimson",
-          color:"#fff", borderRadius:"50%", fontSize:12, padding:"2px 6px"
-        }}>{list.length}</span>
-      )}
-    </button>
-  );
-}
+// frontend/src/layout/Shell.jsx
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getRoleFromToken, clearToken } from "../auth";
+import NotificationBell from "../components/NotificationBell";
 
 export default function Shell({ children }) {
-  const nav = useNavigate();
   const role = getRoleFromToken();
+  const loc = useLocation();
+  const nav = useNavigate();
 
-  const logout = () => { clearToken(); nav("/login", { replace:true }); };
+  const LinkItem = ({ to, children }) => (
+    <Link
+      to={to}
+      style={{
+        padding: "10px 14px",
+        display: "block",
+        textDecoration: "none",
+        color: loc.pathname.startsWith(to) ? "#e6eefc" : "#bfcbd6",
+        background: loc.pathname.startsWith(to) ? "rgba(107,140,255,0.08)" : "transparent",
+        borderRadius: 8,
+        marginBottom: 6,
+        fontWeight: 600,
+      }}
+    >
+      {children}
+    </Link>
+  );
+
+  const logout = () => {
+    clearToken();
+    nav("/login", { replace: true });
+  };
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"240px 1fr", minHeight:"100vh", background:"#111", color:"#eee" }}>
-      <aside style={{ padding:16, borderRight:"1px solid #333" }}>
-        <div style={{ marginBottom:16, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <div>
-            <div style={{ fontWeight:"bold" }}>SIGELIN</div>
-            <div style={{ fontSize:12, opacity:0.7 }}>Rol: {role || "N/A"}</div>
-          </div>
-          <NotificationBell role={role} />
+    <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", minHeight: "100vh", gap: 16 }}>
+      <aside className="panel" style={{ padding: 18, borderRight: "1px solid rgba(255,255,255,0.02)", height: "100vh", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <h3 style={{ marginTop: 0, marginBottom: 8 }}>SIGELIN</h3>
+          {/* Campanita solo para DIRECTOR */}
+          {role === "DIRECTOR" && <NotificationBell />}
         </div>
-        <nav style={{ display:"grid", gap:6 }}>
+
+        <div style={{ marginBottom: 12, fontSize: 13 }} className="muted">Rol: {role}</div>
+        <nav style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <LinkItem to="/dashboard">Dashboard</LinkItem>
           <LinkItem to="/inventory">Inventario</LinkItem>
-          <LinkItem to="/repairs">Reparaciones</LinkItem>
-          <LinkItem to="/parts">Repuestos</LinkItem>
-          <LinkItem to="/purchases">Compras</LinkItem>
           <LinkItem to="/reports">Reportes</LinkItem>
-          {role === "ADMIN" && <LinkItem to="/users">Usuarios</LinkItem>}
-          {role === "DIRECTOR" && <LinkItem to="/purchase-reports">Reportes de compra</LinkItem>}
+          <LinkItem to="/parts">Repuestos</LinkItem>
+          <LinkItem to="/repairs">Reparaciones</LinkItem>
+          {/* Compras solo ADMIN */}
+          {role === "ADMIN" && <LinkItem to="/purchases">Compras</LinkItem>}
         </nav>
-        <button onClick={logout} style={{ marginTop:16, width:"100%" }}>Cerrar sesión</button>
+        <button onClick={logout} style={{ marginTop: 16, width: "100%" }}>Cerrar sesión</button>
       </aside>
-      <main style={{ padding:24 }}>
-        {children}
+
+      <main style={{ padding: 20 }}>
+        <div className="panel" style={{ padding: 18 }}>
+          {children}
+        </div>
       </main>
     </div>
   );

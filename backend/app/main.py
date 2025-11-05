@@ -16,6 +16,9 @@ from .routes.parts import router as parts_router
 from .routes.purchases import router as purchases_router
 from .routes.admin import router as admin_router
 from .routes.reports import router as reports_router
+from .routes.notifications import router as notifications_router
+from .routes.items import router as items_router
+from .routes.locations import router as locations_router
 
 # --- Lifespan: reemplaza on_event startup/shutdown ---
 @asynccontextmanager
@@ -58,3 +61,6 @@ app.include_router(parts_router)
 app.include_router(purchases_router)
 app.include_router(admin_router)
 app.include_router(reports_router)
+app.include_router(notifications_router)
+app.include_router(items_router)
+app.include_router(locations_router)

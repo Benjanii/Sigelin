@@ -1,0 +1,181 @@
+/* ============================
+   SIGELIN – Design System base
+   ============================ */
+
+/* Paleta y tokens */
+:root{
+  --bg: #1f2226;          /* fondo general gris oscuro */
+  --panel: #2a2f35;       /* paneles/cards */
+  --panel-2: #343a40;     /* panel alterno */
+  --line: #3b4046;        /* bordes */
+  --text: #e7e8ea;        /* texto principal */
+  --text-muted: #aeb4bb;  /* texto secundario */
+  --brand: #8aa4ff;       /* acento */
+  --brand-2: #6f90ff;     /* acento hover */
+  --ok: #3fa66a;
+  --warn: #ffb34d;
+  --err: #ff6b6b;
+  --focus: 0 0 0 3px rgba(138,164,255,.25);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 28px rgba(0,0,0,.25);
+  --shadow-sm: 0 6px 18px rgba(0,0,0,.2);
+  --shadow-in: inset 0 0 0 1px var(--line);
+}
+
+
+*{ box-sizing: border-box; }
+html, body, #root{ height:100%; }
+body{
+  margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  background: var(--bg); color: var(--text);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout general */
+.app-shell{
+  display: grid;
+  grid-template-rows: 64px 1fr;
+  min-height: 100vh;
+}
+.app-header{
+  position: sticky; top:0; z-index: 10;
+  display:flex; align-items:center; gap:16px; padding: 0 20px;
+  background: linear-gradient(180deg, #2a2f35, #272c31);
+  border-bottom: 1px solid var(--line);
+}
+.app-header .brand{
+  display:flex; align-items:center; gap:10px; font-weight: 600; letter-spacing:.2px;
+}
+.app-header .brand .dot{
+  width:12px; height:12px; border-radius:999px; background: var(--brand);
+  box-shadow: 0 0 16px var(--brand);
+}
+.app-header .spacer{ flex:1; }
+.app-header .user{
+  display:flex; align-items:center; gap:10px; color: var(--text-muted);
+  font-size: .95rem;
+}
+.app-main{
+  display:grid; grid-template-columns: 1fr; gap: 16px;
+  padding: 18px;
+}
+@media (min-width: 1100px){
+  .app-main{ grid-template-columns: 220px 1fr; align-items:start; }
+}
+
+/* Sidebar */
+.sidebar{
+  position: sticky; top: 72px;
+  display: none;
+  gap:8px; padding: 12px; border:1px solid var(--line); border-radius: var(--radius);
+  background: var(--panel); box-shadow: var(--shadow-sm);
+  height: fit-content;
+}
+@media (min-width: 1100px){ .sidebar{ display: grid; } }
+.nav-link{
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  color: var(--text); text-decoration:none; border-radius: 10px;
+  border:1px solid transparent; transition: .15s ease;
+}
+.nav-link:hover{ background: var(--panel-2); border-color: var(--line); }
+.nav-link.active{ border-color: var(--brand); background: rgba(138,164,255,.08); }
+
+/* Contenedor de página */
+.page{
+  background: transparent;
+}
+.page-title{
+  margin: 0 0 12px 0; font-size: 1.4rem; font-weight: 600;
+}
+
+/* Cards */
+.card{
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.card.headerless{ padding-top: 10px; }
+.card.error{
+  border-color: var(--err); background: linear-gradient(180deg, #2b2224, #252223);
+}
+.card.ok{
+  border-color: var(--ok); background: linear-gradient(180deg, #22312a, #222a26);
+}
+
+/* Botones */
+.btn{
+  appearance: none; border: 1px solid var(--brand); background: var(--brand);
+  color: #101217; padding: 9px 14px; border-radius: 12px;
+  font-weight: 600; cursor: pointer; transition: .15s ease; box-shadow: 0 6px 14px rgba(138,164,255,.2);
+}
+.btn:hover{ background: var(--brand-2); border-color: var(--brand-2); }
+.btn:focus{ outline: none; box-shadow: var(--focus); }
+.btn.ghost{
+  background: transparent; color: var(--text);
+  border-color: var(--line);
+}
+.btn.ghost:hover{ background: var(--panel-2); }
+
+/* Inputs + selects + textareas */
+input, select, textarea{
+  width: 100%; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: #262a2f; color: var(--text);
+  box-shadow: var(--shadow-in);
+}
+input::placeholder, textarea::placeholder{ color: var(--text-muted); }
+input:focus, select:focus, textarea:focus{ outline: none; box-shadow: var(--focus); border-color: var(--brand); }
+
+/* Fieldsets para formularios largos */
+fieldset{
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+  background: #262a2f;
+}
+legend{ color: var(--text-muted); padding: 0 6px; }
+
+/* Tablas */
+.table-responsive{ width:100%; overflow:auto; border-radius: var(--radius-sm); border:1px solid var(--line); }
+table{ width:100%; border-collapse: collapse; background: var(--panel); }
+th, td{ border-bottom: 1px solid var(--line); padding: 10px; text-align: left; }
+thead th{
+  background: #2f343a; color: var(--text); font-weight: 600;
+  position: sticky; top:0; z-index:1;
+}
+tbody tr:hover{ background: rgba(255,255,255,.03); }
+
+/* Badges / etiquetas pequeñas */
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  border:1px solid var(--line); background:#32363b; color:#e6e7e8; font-size:12px;
+}
+
+/* Utilidades tipo Tailwind (minimal) */
+.grid{ display:grid; gap: 8px; }
+.flex{ display:flex; }
+.items-center{ align-items:center; }
+.justify-between{ justify-content: space-between; }
+.gap-2{ gap: 8px; }
+.mt-3{ margin-top: 12px; }
+
+/* Soporte a clases con ':' (escapadas) */
+.md\:grid-cols-2{ grid-template-columns: 1fr; }
+.md\:grid-cols-3{ grid-template-columns: 1fr; }
+@media (min-width: 768px){
+  .md\:grid-cols-2{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-3{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Links */
+a{ color: var(--brand); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+/* Helpers */
+.muted{ color: var(--text-muted); }
+hr{ border: none; border-top: 1px solid var(--line); margin: 10px 0; }
+
+/* Scrollbar sutil */
+::-webkit-scrollbar{ width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb{ background: #3a4047; border-radius: 10px; }
+::-webkit-scrollbar-track{ background: #262a2f; }

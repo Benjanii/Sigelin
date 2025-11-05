@@ -1,3 +1,40 @@
+from fastapi import APIRouter, Depends, HTTPException
+from ..core import db as db_module
+from ..services.security import require_roles
+from datetime import datetime, timedelta
+
+router = APIRouter(prefix="/reports", tags=["reports"])
+
+
+@router.get("/overview")
+def get_overview(db=Depends(lambda: db_module.db), user=Depends(require_roles(["ADMIN","DIRECTOR","TECH"]))):
+    try:
+        items_col = db["items"]
+        repairs_col = db["repairs"]
+        purchases_col = db["purchases"]
+
+        now = datetime.utcnow()
+        since = now - timedelta(days=14)
+
+        total_items = items_col.count_documents({})
+        repairs_by_state = {}
+        for st in ["EN_REPARACION","MALO"]:
+            repairs_by_state[st] = repairs_col.count_documents({"state": st})
+
+        pending_purchases = purchases_col.count_documents({"status": "PENDING"})
+
+        recent_repairs = repairs_col.count_documents({"created_at": {"$gte": since}})
+        recent_purchases = purchases_col.count_documents({"created_at": {"$gte": since}})
+
+        payload = {
+            "inventory": {"total": total_items},
+            "repairs": {"by_state": repairs_by_state, "last14d": recent_repairs},
+            "purchases": {"pending": pending_purchases, "last14d": recent_purchases},
+            "generated_at": now.isoformat() + "Z"
+        }
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"overview_error: {e}")
 from fastapi import APIRouter
 from ..core import db as db_module
 

@@ -29,7 +29,7 @@ export default function PartsPage() {
       <table border="1" cellPadding="8" cellSpacing="0">
         <thead>
           <tr>
-            <th>SKU</th><th>Nombre</th><th>Stock</th><th>Stock mínimo</th><th>Unidad</th><th>Categoría</th><th>Ubicación</th>
+            <th>SKU</th><th>Nombre</th><th>Stock</th><th>Ubicación</th>
           </tr>
         </thead>
         <tbody>
@@ -38,10 +38,7 @@ export default function PartsPage() {
               <td>{p.sku}</td>
               <td>{p.name}</td>
               <td>{p.stock}</td>
-              <td>{p.minStock ?? 0}</td>
-              <td>{p.unit || "-"}</td>
-              <td>{p.category || "-"}</td>
-              <td>{p.location || "-"}</td>
+              <td>{p.location}</td>
             </tr>
           ))}
         </tbody>
